@@ -53,7 +53,7 @@ def transform_multrees(ifil, mfil, ofil):
     Parameters
     ----------
     ifil : string
-           name of input gene tree file (one newick string per line)
+           name of input gene family tree file (one newick string per line)
     mfil : string
            name of input gene to species label map file (ASTRAL-multi)
     ofil : string
@@ -96,10 +96,6 @@ def transform_multrees(ifil, mfil, ofil):
             [rootl, rootr] = root.child_nodes()
             rootl.up_profile = rootr.down_profile
             rootr.up_profile = rootl.down_profile
-
-            #test = rootl.down_profile.intersection(rootr.down_profile)
-            #if len(test) != 0:
-            #    sys.exit("Duplication at root!")
 
             for node in nodes:
                 if (node == root) or (node == rootl) or (node == rootr):
@@ -159,10 +155,13 @@ def transform_multrees(ifil, mfil, ofil):
 
 
 def main(args):
-    base = args.input.rsplit('.', 1)
-    prefix = base[0]
-    suffix = base[1]
-    output = base[0] + "-for-fastrfs." + base[1]
+    if args.output is None:
+        base = args.input.rsplit('.', 1)
+        prefix = base[0]
+        suffix = base[1]
+        output = base[0] + "-for-fastrfs." + base[1]
+    else:
+        output = args.output
     transform_multrees(args.input, args.map, output)
 
 
@@ -173,5 +172,7 @@ if __name__ == '__main__':
                         help="Input file", required=True)
     parser.add_argument("-a", "--map", type=str,
                         help="Input file", required=True)
+    parser.add_argument("-o", "--output", type=str,
+                        help="Output file name", required=False)
 
     main(parser.parse_args())
