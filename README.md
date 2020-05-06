@@ -5,7 +5,7 @@ FastMulRFS
 REQUIREMENTS
 ------------
 + Python 2.7 or later (including Python 3)
-+ [DendroPy](https://www.dendropy.org)
++ [DendroPy](https://www.dendropy.org) if using version 1
 
 EXTERNAL DEPENDENCIES (see install instructions [here](external/README.md))
 ---------------------

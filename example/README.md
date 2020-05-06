@@ -3,7 +3,7 @@ FastMulRFS Example
 
 **Step 1: Transform MUL-trees into singly-labeled trees.**
 ```
-python ../python-tools/preprocess_multrees_for_fastrfs.py \
+python ../python-tools/preprocess_multrees_v1.py \
     -i g_trees-s2g.trees \
     -a g_trees-s2g-map.txt
 ```

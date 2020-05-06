@@ -6,7 +6,7 @@ fastmulrfs="../external/FastRFS/build/FastRFS"
 python $tools/map_species_to_gene_simphy.py \
     -i g_trees.trees
 
-python $tools/preprocess_multrees_for_fastrfs.py \
+python $tools/preprocess_multrees_v1.py \
     -i g_trees-s2g.trees \
     -a g_trees-s2g-map.txt
 
