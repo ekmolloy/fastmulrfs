@@ -19,7 +19,8 @@ def read_g2s_map(ifil):
     Parameters
     ----------
     ifil : string
-           name of input gene to species label map file (ASTRAL-multi)
+           name of input label map file; each row has form:
+           species_name:gene_name_1,gene_name_2,...
 
     Returns
     -------
@@ -55,7 +56,8 @@ def transform_multrees(ifil, mfil, ofil):
     ifil : string
            name of input gene family tree file (one newick string per line)
     mfil : string
-           name of input gene to species label map file (ASTRAL-multi)
+           name of input label map file; each row has form:
+           species_name:gene_name_1,gene_name_2,...
     ofil : string
            name of output file (one newick string per line)
     """
@@ -169,10 +171,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input", type=str,
-                        help="Input file", required=True)
+                        help="Input file containing gene family trees "
+                             "(one newick string per line)",
+                        required=True)
     parser.add_argument("-a", "--map", type=str,
-                        help="Input file", required=True)
+                        help="Input file containing label map (each row has form: "
+                             "'species_name:gene_name_1,gene_name_2,...')",
+                        required=True)
     parser.add_argument("-o", "--output", type=str,
-                        help="Output file name", required=False)
+                        help="Output file name",
+                        required=False)
 
     main(parser.parse_args())
