@@ -77,6 +77,13 @@ def build_up_profiles(tree):
 def contract_edges_w_invalid_bipartitions(tree):
     """
     """
+    L_M = len(tree.leaf_nodes())
+    I_M = len(tree.internal_edges(exclude_seed_edge=True))
+    E_M = L_M + I_M
+    
+    X = 0
+    R = 0
+    O = 0
     for node in tree.postorder_node_iter():
         if node == tree.seed_node:
             pass
@@ -85,8 +92,13 @@ def contract_edges_w_invalid_bipartitions(tree):
         else:
             test = node.down_profile.intersection(node.up_profile)
             if len(test) != 0:
+                X += 1
                 node.edge.length = 0.0
             else:
+                if (len(node.down_profile) == 1) or (len(node.up_profile) == 1):
+                    R += 1
+                else:
+                    O += 1
                 node.edge.length = 1.0
 
     tree.collapse_unweighted_edges()
@@ -94,22 +106,37 @@ def contract_edges_w_invalid_bipartitions(tree):
     for edge in tree.edges():
         edge.length = None
 
+    if I_M != X + R + O:
+        sys.exit("Error: Bad edge count!")
+
+    L_MX = len(tree.leaf_nodes())
+    I_MX = len(tree.internal_edges(exclude_seed_edge=True))
+    E_MX = L_MX + I_MX
+
+    return [L_M, E_M, R, L_MX, E_MX]
+
 
 def prune_multiple_copies_of_species(tree, g2s_map):
     """
     """
+    found = set([])
+    c = 0
     for l in tree.leaf_nodes():
-        x = l.taxon.label
-        s = g2s_map[x]
-        if x != g2s_map[s][0]:
+        gene = l.taxon.label
+        species = g2s_map[gene]
+        if gene != g2s_map[species][0]:
             l.taxon = None
+            if not (species in found):
+                found.add(species)
+                c += 1
 
     tree.prune_leaves_without_taxa()
 
-    # Relabel leaves
     for l in tree.leaf_nodes():
         x = l.taxon.label
         l.taxon.label = g2s_map[x]
+
+    return c
 
 
 def preprocess_multree(tree, g2s_map):
@@ -119,15 +146,17 @@ def preprocess_multree(tree, g2s_map):
     tree.is_rooted = False
     tree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
 
-    is_binary(tree)
+    is_binary(tree)  # TODO: Update to work on unresolved MUL-trees!
 
     build_down_profiles(tree, g2s_map)
-
     build_up_profiles(tree)
 
-    contract_edges_w_invalid_bipartitions(tree)
+    [L_M, E_M, R, L_MX, E_MX] = contract_edges_w_invalid_bipartitions(tree)
+    c = prune_multiple_copies_of_species(tree, g2s_map)
 
-    prune_multiple_copies_of_species(tree, g2s_map)
+    score_shift = L_MX + c + E_M - E_MX - (2 * R) - L_M
+
+    return score_shift
 
 
 def read_g2s_map(ifil):
@@ -168,25 +197,22 @@ def read_preprocess_and_write_multrees(ifil, mfil, ofil):
     ofil : string
            name of output file (one newick string per line)
     """
-    ostr = ""
-
     g2s_map = read_g2s_map(mfil)
 
-    with open(ifil, 'r') as f:
-        for line in f.readlines():
+    with open(ifil, 'r') as fi, open(ofil, 'w') as fo:
+        for line in fi.readlines():
             temp = "".join(line.split())
             tree = dendropy.Tree.get(data=temp,
                                      schema="newick",
                                      rooting='force-unrooted',
                                      preserve_underscores=True)
 
-            preprocess_multree(tree, g2s_map)
+            score_shift = preprocess_multree(tree, g2s_map)
 
             if len([l for l in tree.leaf_nodes()]) > 3:
-                ostr += tree.as_string(schema="newick")[5:]
-
-    with open(ofil, 'w') as f:
-        f.write(ostr)
+                fo.write(tree.as_string(schema="newick")[5:])
+            else:
+                f.write("\n")
 
 
 def main(args):
