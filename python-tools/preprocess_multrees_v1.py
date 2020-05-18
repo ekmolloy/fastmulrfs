@@ -14,19 +14,6 @@ import dendropy
 import sys
 
 
-def is_binary(tree):
-    """
-    """
-    root = tree.seed_node
-    if len(root.child_nodes()) != 3:
-        sys.exit("Tree is not binary!")
-
-    for node in tree.preorder_node_iter():
-        if (node != root) and (not node.is_leaf()):
-            if len(node.child_nodes()) != 2:
-                sys.exit("Tree is not binary!")
-
-
 def build_down_profiles(tree, g2s_map):
     """
     """
@@ -34,68 +21,63 @@ def build_down_profiles(tree, g2s_map):
         if node.is_leaf():
             gene = node.taxon.label
             species = g2s_map[gene]
-            node.down_profile = set([species])
+            node.down = set([species])
             try:
                 g2s_map[species] = g2s_map[species] + [gene]
             except KeyError:
                 g2s_map[species] = [gene]
         else:
-            children = node.child_nodes()
-            if len(children) == 2:
-                [l, r] = children
-                node.down_profile = l.down_profile.union(r.down_profile)
-            else:
-                [l, m, r] = children
-                lr = l.down_profile.union(r.down_profile)
-                node.down_profile = lr.union(m.down_profile)
+            node.down = set([])
+            for child in node.child_nodes():
+                node.down = node.down.union(child.down)
 
 
 def build_up_profiles(tree):
     """
     """
     root = tree.seed_node
-    [rootl, rootm, rootr] = root.child_nodes()
-    rootl.up_profile = rootm.down_profile.union(rootr.down_profile)
-    rootm.up_profile = rootl.down_profile.union(rootr.down_profile)
-    rootr.up_profile = rootl.down_profile.union(rootm.down_profile)
+    children_of_root = root.child_nodes()
+    for node in children_of_root:
+        node.up = set([])
+        for sibl in children_of_root:
+            if node != sibl:
+                node.up = node.up.union(sibl.down)
+    children_of_root = set(children_of_root)
 
     for node in tree.preorder_node_iter():
-        if (node == root) or (node == rootl) or (node == rootm) or (node == rootr):
+        if (node == root) or (node in children_of_root):
             pass
         elif node.is_leaf():
             pass
         else:
             parent = node.parent_node
-            [pl, pr] = parent.child_nodes()
-            if node == pl:
-                sibling = pr.down_profile
-            else:
-                sibling = pl.down_profile
-            node.up_profile = parent.up_profile.union(sibling)
+            node.up = parent.up
+            for sibl in parent.child_nodes():
+                if node != sibl:
+                    node.up = node.up.union(sibl.down)
 
 
 def contract_edges_w_invalid_bipartitions(tree):
     """
     """
-    L_M = len(tree.leaf_nodes())
-    I_M = len(tree.internal_edges(exclude_seed_edge=True))
-    E_M = L_M + I_M
-    
+    L_M = 0
     X = 0
     R = 0
     O = 0
+
     for node in tree.postorder_node_iter():
         if node == tree.seed_node:
             pass
         elif node.is_leaf():
             node.edge.length = 1.0
+            L_M += 1
         else:
-            test = node.down_profile.intersection(node.up_profile)
+            test = node.down.intersection(node.up)
             if len(test) != 0:
                 X += 1
                 node.edge.length = 0.0
             else:
-                if (len(node.down_profile) == 1) or (len(node.up_profile) == 1):
+                if (len(node.down) == 1) or (len(node.up) == 1):
                     R += 1
                 else:
                     O += 1
@@ -106,14 +88,9 @@ def contract_edges_w_invalid_bipartitions(tree):
     for edge in tree.edges():
         edge.length = None
 
-    if I_M != X + R + O:
-        sys.exit("Error: Bad edge count!")
+    E_M = L_M + X + R + O
 
-    L_MX = len(tree.leaf_nodes())
-    I_MX = len(tree.internal_edges(exclude_seed_edge=True))
-    E_MX = L_MX + I_MX
-
-    return [L_M, E_M, R, L_MX, E_MX]
+    return [L_M, E_M, R, O]
 
 
 def prune_multiple_copies_of_species(tree, g2s_map):
@@ -136,7 +113,9 @@ def prune_multiple_copies_of_species(tree, g2s_map):
         x = l.taxon.label
         l.taxon.label = g2s_map[x]
 
-    return c
+    L_MX = len(tree.leaf_nodes())
+
+    return [L_MX, c]
 
 
 def preprocess_multree(tree, g2s_map):
@@ -146,14 +125,14 @@ def preprocess_multree(tree, g2s_map):
     tree.is_rooted = False
     tree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
 
-    is_binary(tree)  # TODO: Update to work on unresolved MUL-trees!
-
     build_down_profiles(tree, g2s_map)
     build_up_profiles(tree)
 
-    [L_M, E_M, R, L_MX, E_MX] = contract_edges_w_invalid_bipartitions(tree)
-    c = prune_multiple_copies_of_species(tree, g2s_map)
+    [L_M, E_M, R, O] = contract_edges_w_invalid_bipartitions(tree)
+    [L_MX, c] = prune_multiple_copies_of_species(tree, g2s_map)
+    E_MX = O + L_MX
 
+    print("S = %d, c = %d, E_M = %d, E_MX = %d, R = %d, L_M = %d" % (L_MX, c, E_M, E_MX, R, L_M))
     score_shift = L_MX + c + E_M - E_MX - (2 * R) - L_M
 
     return score_shift
