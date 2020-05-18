@@ -132,7 +132,6 @@ def preprocess_multree(tree, g2s_map):
     [L_MX, c] = prune_multiple_copies_of_species(tree, g2s_map)
     E_MX = O + L_MX
 
-    print("S = %d, c = %d, E_M = %d, E_MX = %d, R = %d, L_M = %d" % (L_MX, c, E_M, E_MX, R, L_M))
     score_shift = L_MX + c + E_M - E_MX - (2 * R) - L_M
 
     return score_shift
@@ -148,18 +147,18 @@ def read_g2s_map(ifil):
 
     Returns
     -------
-    g2sm : python dictionary
-           maps gene labels to species labels
+    g2s_map : python dictionary
+              maps gene labels to species labels
     """
-    g2sm = {}
+    g2s_map = {}
     with open(ifil, 'r') as f:
         for line in f.readlines():
             [species, genes] = line.split(':')
             genes = genes.split(',')
             genes[-1] = genes[-1].replace('\n', '')
             for gene in genes:
-                g2sm[gene] = species
-    return g2sm
+                g2s_map[gene] = species
+    return g2s_map
 
 
 def read_preprocess_and_write_multrees(ifil, mfil, ofil):
@@ -179,6 +178,7 @@ def read_preprocess_and_write_multrees(ifil, mfil, ofil):
     g2s_map = read_g2s_map(mfil)
 
     with open(ifil, 'r') as fi, open(ofil, 'w') as fo:
+        g = 1
         for line in fi.readlines():
             temp = "".join(line.split())
             tree = dendropy.Tree.get(data=temp,
@@ -191,7 +191,9 @@ def read_preprocess_and_write_multrees(ifil, mfil, ofil):
             if len([l for l in tree.leaf_nodes()]) > 3:
                 fo.write(tree.as_string(schema="newick")[5:])
             else:
-                f.write("\n")
+                sys.stdout.write("Removing gene tree on line %d, as it has three or fewer taxa!\n" % g)
+
+            g += 1
 
 
 def main(args):
