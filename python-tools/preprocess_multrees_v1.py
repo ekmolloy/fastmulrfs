@@ -39,11 +39,13 @@ def read_g2s_map(ifil):
 
 
 def is_binary(tree):
-    nodes = [n for n in tree.preorder_node_iter()]
-    for node in nodes[1:]:
-        if not node.is_leaf():
-            children = node.child_nodes()
-            if len(children) != 2:
+    root = tree.seed_node
+    if len(root.child_nodes()) != 3:
+        sys.exit("Tree is not binary!")
+
+    for node in tree.preorder_node_iter():
+        if (node != root) and (not node.is_leaf()):
+            if len(node.child_nodes()) != 2:
                 sys.exit("Tree is not binary!")
 
 
@@ -74,9 +76,12 @@ def transform_multrees(ifil, mfil, ofil):
                                      rooting='force-unrooted',
                                      preserve_underscores=True)
 
+            # Unroot tree
+            tree.is_rooted = False
+            tree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
+
             # Randomly root tree!
             is_binary(tree)
-            tree.resolve_polytomies(limit=2, update_bipartitions=False)
 
             # Create down profiles
             for node in tree.postorder_node_iter():
@@ -89,18 +94,24 @@ def transform_multrees(ifil, mfil, ofil):
                     except KeyError:
                         s2gm[species] = [gene]
                 else:
-                    [l, r] = node.child_nodes()
-                    node.down_profile = l.down_profile.union(r.down_profile)
+                    children = node.child_nodes()
+                    if len(children) == 2:
+                        [l, r] = children
+                        node.down_profile = l.down_profile.union(r.down_profile)
+                    else:
+                        [l, m, r] = children
+                        lr = l.down_profile.union(r.down_profile)
+                        node.down_profile = lr.union(m.down_profile)
 
             # Create up profiles
-            nodes = [n for n in tree.preorder_node_iter()]
             root = tree.seed_node
-            [rootl, rootr] = root.child_nodes()
-            rootl.up_profile = rootr.down_profile
-            rootr.up_profile = rootl.down_profile
+            [rootl, rootm, rootr] = root.child_nodes()
+            rootl.up_profile = rootm.down_profile.union(rootr.down_profile)
+            rootm.up_profile = rootl.down_profile.union(rootr.down_profile)
+            rootr.up_profile = rootl.down_profile.union(rootm.down_profile)
 
-            for node in nodes:
-                if (node == root) or (node == rootl) or (node == rootr):
+            for node in tree.preorder_node_iter():
+                if (node == root) or (node == rootl) or (node == rootm) or (node == rootr):
                     pass
                 elif node.is_leaf():
                     pass
@@ -144,10 +155,6 @@ def transform_multrees(ifil, mfil, ofil):
             for l in tree.leaf_nodes():
                 x = l.taxon.label
                 l.taxon.label = g2sm[x]
-
-            # Unroot tree
-            tree.is_rooted = False
-            tree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
 
             if len([l for l in tree.leaf_nodes()]) > 3:
                 ostr += tree.as_string(schema="newick")[5:]
