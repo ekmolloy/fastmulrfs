@@ -57,7 +57,7 @@ Step 3: Get FastRFS
 ---------------------
 **Step 3a: Download FastRFS.**
 ```
-git clone https://github.com/pranjalv123/FastRFS.git
+git clone https://github.com/ekmolloy/FastRFS.git
 ```
 
 **Step 3b: Open file `FastRFS/src/CMakeLists.txt` and change `ON` to `OFF` in line 3, so the line reads:**

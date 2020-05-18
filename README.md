@@ -9,7 +9,7 @@ REQUIREMENTS
 
 EXTERNAL DEPENDENCIES (see install instructions [here](external/README.md))
 ---------------------
-+ [FastRFS](https://github.com/pranjalv123/fastrfs)
++ [FastRFS](https://github.com/ekmolloy/fastrfs)
 + [ASTRAL](https://github.com/smirarab/astral)
 
 LICENSE
