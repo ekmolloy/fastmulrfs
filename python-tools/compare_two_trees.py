@@ -30,26 +30,27 @@ def compare_trees(tr1, tr2):
     -------
     nl : int
          Size of the shared leaf set, i.e., the number of leaves in both trees
-    ei1 : int
-          Number of internal edges in first tree (after restricting it to the shared leaf set)
-    ei2 : int
-          Number of internal edges in second tree (after restricting it to the shared leaf set)
+    i1 : int
+          Number of internal edges in tree 1 after restriction to shared leaves
+    i2 : int
+          Number of internal edges in tree 2 after restriction to shared leaves
     fn : int
-         Number of edges in the first tree that are not in the second tree
+         Number of edges in tree 1 that are not in tree 2
     fp : int
-         Number of edges in the second tree that are not in the first tree
+         Number of edges in tree 2 that are not in tree 1
     rf : float
-         Normalized Robinson-Foulds (RF) distance between the first and second trees
+         Normalized Robinson-Foulds (RF) distance between tree 1 and 2
 
     Example
     -------
-    If tree 1 corresponds to "(((A,B,C),D),E);" and tree 2 corresponds to "((((A,B),C),D),E);",
+    If tree 1 corresponds to "(((A,B,C),D),E);"
+    and tree 2 corresponds to "((((A,B),C),D),E);",
     then the output is "5 1 2 0 1 0.25". In this example,
-      + first and second trees share 5 leaves (A, B, C, D, E).
-      + first tree has one internal edge "A,B,C|D,E"
-      + second tree has two internal edges "A,B|C,D,E" and "A,B,C|D,E"
-      + one edges in the first tree that are missing from the second tree
-      + no edge "A,B|C,D,E" in the second tree that is missing in the first tree
+      + tree 1 and tree 2 share five leaves (A, B, C, D, E).
+      + tree 1 has one internal edge "A,B,C|D,E"
+      + tree 2 has two internal edges "A,B|C,D,E" and "A,B,C|D,E"
+      + no edges in the tree 1 are missing from tree 2
+      + one edge in the tree 2 is missing from the tree 1
       + normalized RF distance is (FP+FN)/(2*NL-6) = (1+0)/(2*5-6) = 0.25
     """
 
@@ -81,13 +82,13 @@ def compare_trees(tr1, tr2):
     tr2.update_bipartitions()
 
     nl = len(com)
-    ei1 = len(tr1.internal_edges(exclude_seed_edge=True))
-    ei2 = len(tr2.internal_edges(exclude_seed_edge=True))
+    i1 = len(tr1.internal_edges(exclude_seed_edge=True))
+    i2 = len(tr2.internal_edges(exclude_seed_edge=True))
 
-    [fn, fp] = false_positives_and_negatives(tr1, tr2)
+    [fp, fn] = false_positives_and_negatives(tr1, tr2)
     rf = (fn + fp) / (2.0 * nl - 6.0)
 
-    return(nl, ei1, ei2, fn, fp, rf)
+    return(nl, i1, i2, fn, fp, rf)
 
 
 def main(args):
@@ -102,8 +103,8 @@ def main(args):
                             rooting='force-unrooted',
                             taxon_namespace=tax)
 
-    [nl, ei1, ei2, fn, fp, rf] = compare_trees(tr1, tr2)
-    sys.stdout.write('%d,%d,%d,%d,%d,%1.6f\n' % (nl, ei1, ei2, fn, fp, rf))
+    [nl, i1, i2, fn, fp, rf] = compare_trees(tr1, tr2)
+    sys.stdout.write('%d,%d,%d,%d,%d,%1.6f\n' % (nl, i1, i2, fn, fp, rf))
     sys.stdout.flush()
     os._exit(0)  # CRITICAL ON BLUE WATERS LOGIN NODE
 
