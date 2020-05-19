@@ -42,22 +42,22 @@ def score_with_MulRF(mulrf, stree, gtree, temp):
     score : integer
             RF distance between species tree and gene tree
     """
-    otree = temp + ".tree"
+    ifile = temp + ".tree"
     ofile = temp + ".out"
     lfile = temp + ".log"
 
-    with open(otree, 'w') as f:
+    with open(ifile, 'w') as f:
         f.write(stree.as_string(schema="newick").replace("'", ""))
         f.write(gtree.as_string(schema="newick")[5:].replace("'", ""))
 
-    os.system(mulrf + " -i " + otree + " -o " + ofile + " &> " + lfile)
+    os.system(mulrf + " -i " + ifile + " -o " + ofile + " &> " + lfile)
 
     with open(ofile, 'r') as f:
         line = f.readline()
-        words = line.split()
+    words = line.split()
     score = float(words[-1].replace(']', ''))
 
-    os.system("rm " + otree)
+    os.system("rm " + ifile)
     os.system("rm " + ofile)
     os.system("rm " + lfile)
 
