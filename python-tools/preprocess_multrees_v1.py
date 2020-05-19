@@ -1,6 +1,7 @@
 """
 This file is a python prototype of Algorithm 1 from the paper:
-Molloy, E.K., Warnow, T. (2020). FastMulRFS: Fast and accurate species tree estimation under generic gene duplication and loss models.
+Molloy, E.K., Warnow, T. (2020). FastMulRFS: Fast and accurate species tree
+    estimation under generic gene duplication and loss models.
 https://doi.org/10.1101/835553
 
 Copyright (c) 2020 Erin K. Molloy
@@ -16,6 +17,12 @@ import sys
 
 def build_down_profiles(tree, g2s_map):
     """
+    Annotates edge above each node with an 'down profile', i.e., the set of
+    species below the edge
+
+    Parameters
+    ----------
+    tree : dendropy tree object
     """
     for node in tree.postorder_node_iter():
         if node.is_leaf():
@@ -34,6 +41,14 @@ def build_down_profiles(tree, g2s_map):
 
 def build_up_profiles(tree):
     """
+    Annotates edge above each node with an 'up profile', i.e., the set of
+    species above the edge
+
+    NOTE: Must be called after build_down_profiles()
+
+    Parameters
+    ----------
+    tree : dendropy tree object
     """
     root = tree.seed_node
     children_of_root = root.child_nodes()
@@ -59,28 +74,35 @@ def build_up_profiles(tree):
 
 def contract_edges_w_invalid_bipartitions(tree):
     """
+    Contracts edges that do not induce valid bipartitions
+
+    NOTE: Must be called after build_down_profiles() and build_up_profiles()
+
+    Parameters
+    ----------
+    tree : dendropy tree object
     """
-    L_M = 0
-    X = 0
-    R = 0
-    O = 0
+    nLM = 0
+    nX = 0
+    nR = 0
+    nO = 0
 
     for node in tree.postorder_node_iter():
         if node == tree.seed_node:
             pass
         elif node.is_leaf():
             node.edge.length = 1.0
-            L_M += 1
+            nLM += 1
         else:
             test = node.down.intersection(node.up)
             if len(test) != 0:
-                X += 1
+                nX += 1
                 node.edge.length = 0.0
             else:
                 if (len(node.down) == 1) or (len(node.up) == 1):
-                    R += 1
+                    nR += 1
                 else:
-                    O += 1
+                    nO += 1
                 node.edge.length = 1.0
 
     tree.collapse_unweighted_edges()
@@ -88,13 +110,20 @@ def contract_edges_w_invalid_bipartitions(tree):
     for edge in tree.edges():
         edge.length = None
 
-    E_M = L_M + X + R + O
+    nEM = nLM + nX + nR + nO
 
-    return [L_M, E_M, R, O]
+    return [nLM, nEM, nR, nO]
 
 
 def prune_multiple_copies_of_species(tree, g2s_map):
     """
+    Removes all but one leaf with the same species label
+
+    Parameters
+    ----------
+    tree : dendropy tree object
+    g2s_map : dictionary
+              maps gene copy labels to species labels
     """
     found = set([])
     c = 0
@@ -109,18 +138,24 @@ def prune_multiple_copies_of_species(tree, g2s_map):
 
     tree.prune_leaves_without_taxa()
 
+    nLMX = 0
     for l in tree.leaf_nodes():
-        x = l.taxon.label
-        l.taxon.label = g2s_map[x]
+        temp = l.taxon.label
+        l.taxon.label = g2s_map[temp]
+        nLMX += 1
 
-    L_MX = len(tree.leaf_nodes())
-
-    return [L_MX, c]
+    return [nLMX, c]
 
 
 def preprocess_multree(tree, g2s_map):
     """
     Preprocesses MUL-tree as described in the FastMulRFS paper
+
+    Parameters
+    ----------
+    tree : dendropy tree object
+    g2s_map : dictionary
+              maps gene copy labels to species labels
     """
     tree.is_rooted = False
     tree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
@@ -128,30 +163,33 @@ def preprocess_multree(tree, g2s_map):
     build_down_profiles(tree, g2s_map)
     build_up_profiles(tree)
 
-    [L_M, E_M, R, O] = contract_edges_w_invalid_bipartitions(tree)
-    [L_MX, c] = prune_multiple_copies_of_species(tree, g2s_map)
-    E_MX = O + L_MX
+    [nLM, nEM, nR, nO] = contract_edges_w_invalid_bipartitions(tree)
+    [nLMX, c] = prune_multiple_copies_of_species(tree, g2s_map)
+    nEMX = nO + nLMX
 
-    score_shift = L_MX + c + E_M - E_MX - (2 * R) - L_M
+    score_shift = nLMX + c + nEM - nEMX - (2 * nR) - nLM
 
     return score_shift
 
 
-def read_g2s_map(ifil):
+def read_g2s_map(ifile):
     """
+    Reads file containing map from gene copy to species labels into dictionary
+
     Parameters
     ----------
-    ifil : string
-           name of input label map file; each row has form:
-           species_name:gene_name_1,gene_name_2,...
+    ifile : string
+            name of file containing map between gene copy and species labels
+            each row has form:
+            species_name:gene_name_1,gene_name_2,...
 
     Returns
     -------
     g2s_map : python dictionary
-              maps gene labels to species labels
+              maps gene copy labels to species labels
     """
     g2s_map = {}
-    with open(ifil, 'r') as f:
+    with open(ifile, 'r') as f:
         for line in f.readlines():
             [species, genes] = line.split(':')
             genes = genes.split(',')
@@ -161,37 +199,39 @@ def read_g2s_map(ifil):
     return g2s_map
 
 
-def read_preprocess_and_write_multrees(ifil, mfil, ofil):
+def read_preprocess_and_write_multrees(ifile, mfile, ofile):
     """
     Creates file with preprocessed MUL-trees for FastRFS
 
     Parameters
     ----------
-    ifil : string
-           name of input gene family tree file (one newick string per line)
-    mfil : string
-           name of input label map file; each row has form:
-           species_name:gene_name_1,gene_name_2,...
-    ofil : string
-           name of output file (one newick string per line)
+    ifile : string
+            name of file containing gene family trees
+            (one newick string per line)
+    mfile : string
+            name of file containing label map file; each row has form:
+            species_name:gene_name_1,gene_name_2,...
+    ofile : string
+            name of output file (one newick string per line)
     """
-    g2s_map = read_g2s_map(mfil)
+    g2s_map = read_g2s_map(mfile)
 
-    with open(ifil, 'r') as fi, open(ofil, 'w') as fo:
+    with open(ifile, 'r') as fi, open(ofile, 'w') as fo:
         g = 1
         for line in fi.readlines():
             temp = "".join(line.split())
             tree = dendropy.Tree.get(data=temp,
                                      schema="newick",
-                                     rooting='force-unrooted',
+                                     rooting="force-unrooted",
                                      preserve_underscores=True)
 
             score_shift = preprocess_multree(tree, g2s_map)
 
-            if len([l for l in tree.leaf_nodes()]) > 3:
+            if len(tree.leaf_nodes()) > 3:
                 fo.write(tree.as_string(schema="newick")[5:])
             else:
-                sys.stdout.write("Removing gene tree on line %d, as it has three or fewer taxa!\n" % g)
+                sys.stdout.write("Removing gene tree on line %d "
+                                 "as it has three or fewer taxa!\n" % g)
 
             g += 1
 
@@ -216,7 +256,8 @@ if __name__ == '__main__':
                              "(one newick string per line)",
                         required=True)
     parser.add_argument("-a", "--map", type=str,
-                        help="Input file containing label map (each row has form: "
+                        help="Input file containing label map; "
+                             "each row has form: "
                              "'species_name:gene_name_1,gene_name_2,...')",
                         required=True)
     parser.add_argument("-o", "--output", type=str,
