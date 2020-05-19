@@ -92,18 +92,19 @@ def compare_trees(tr1, tr2):
 
 
 def main(args):
-    tax = dendropy.TaxonNamespace()
-    tr1 = dendropy.Tree.get(path=args.tree1,
-                            schema='newick',
-                            rooting='force-unrooted',
-                            taxon_namespace=tax)
+    taxa = dendropy.TaxonNamespace()
 
-    tr2 = dendropy.Tree.get(path=args.tree2,
-                            schema='newick',
-                            rooting='force-unrooted',
-                            taxon_namespace=tax)
+    tree1 = dendropy.Tree.get(path=args.tree1,
+                              schema='newick',
+                              rooting='force-unrooted',
+                              taxon_namespace=taxa)
 
-    [nl, i1, i2, fn, fp, rf] = compare_trees(tr1, tr2)
+    tree2 = dendropy.Tree.get(path=args.tree2,
+                              schema='newick',
+                              rooting='force-unrooted',
+                              taxon_namespace=taxa)
+
+    [nl, i1, i2, fn, fp, rf] = compare_trees(tree1, tree2)
     sys.stdout.write('%d,%d,%d,%d,%d,%1.6f\n' % (nl, i1, i2, fn, fp, rf))
     sys.stdout.flush()
     os._exit(0)  # CRITICAL ON BLUE WATERS LOGIN NODE
@@ -113,8 +114,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-t1", "--tree1", type=str,
-                        help="Input tree 1 file", required=True)
+                        help="Input file containing tree 1",
+                        required=True)
     parser.add_argument("-t2", "--tree2", type=str,
-                        help="Input tree 2 file", required=True)
+                        help="Input file containing tree 2",
+                        required=True)
 
     main(parser.parse_args())
