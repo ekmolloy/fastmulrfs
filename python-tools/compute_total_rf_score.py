@@ -11,21 +11,21 @@ def main(args):
 
     total_fp = 0
     total_fn = 0
-    total_rf = 0 
+    total_rf = 0
 
     with open(args.gtreelist, 'r') as f:
         for l, line in enumerate(f.readlines()):
             taxa = dendropy.TaxonNamespace()
 
             stree = dendropy.Tree.get(string=temp,
-                                     schema='newick',
-                                     rooting='force-unrooted',
-                                     taxon_namespace=taxa)
+                                      schema='newick',
+                                      rooting='force-unrooted',
+                                      taxon_namespace=taxa)
 
             gtree = dendropy.Tree.get(string=line,
-                                     schema='newick',
-                                     rooting='force-unrooted',
-                                     taxon_namespace=taxa)
+                                      schema='newick',
+                                      rooting='force-unrooted',
+                                      taxon_namespace=taxa)
 
             [nl, ei1, ei2, fn, fp, rf] = compare_trees(stree, gtree)
 
