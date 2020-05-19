@@ -91,6 +91,8 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
     # Read gene to species name map
     g2s_map = read_g2s_map(mfile)
 
+    total_rf = 0
+
     with open(gfile, 'r') as f:
         g = 1
         for line in f.readlines():
@@ -125,7 +127,13 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
             if mxscore + score_shift != mscore:
                 sys.stdout.write("Gene tree on line %d failed!" % g)
 
+            total_rf += mscore
+
             g += 1
+
+    sys.stdout.write('%d\n' % total_rf)
+    sys.stdout.flush()
+    os._exit(0)  # CRITICAL ON BLUE WATERS LOGIN NODE
 
 
 def main(args):
