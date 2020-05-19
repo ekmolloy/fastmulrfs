@@ -6,20 +6,45 @@ import os
 import sys
 
 
-def relabel_multree(tree, g2s_map):
+def relabel_tree_by_species(tree, g2s_map):
     """
+    Relabels leaves in tree by species (previously labeled by gene copies)
+
+    Parameters
+    ----------
+    tree : dendropy tree object
+    g2s_map : dictionary
+              maps gene copy labels to species labels
     """
-    for l in tree.leaf_nodes():
-        x = l.taxon.label
-        l.taxon.label = g2s_map[x]
+    for leaf in tree.leaf_nodes():
+        temp = leaf.taxon.label
+        leaf.taxon.label = g2s_map[temp]
 
 
-def score_with_MulRF(mulrf, stree, gtree, tmpname):
+def score_with_MulRF(mulrf, stree, gtree, temp):
     """
+    Uses MulRF to compute the RF distance between a species tree and a gene
+    family tree
+
+    Parameters
+    ----------
+    mulrf : string
+            name including full path of MulRFScorer binary
+    stree : dendropy tree object
+            species tree
+    gtree : dendropy tree object
+            gene family tree
+    temp : string
+           name for creating temporary files
+
+    Returns
+    -------
+    score : integer
+            RF distance between species tree and gene tree
     """
-    otree = tmpname + ".tree"
-    ofile = tmpname + ".out"
-    lfile = tmpname + ".log"
+    otree = temp + ".tree"
+    ofile = temp + ".out"
+    lfile = temp + ".log"
 
     with open(otree, 'w') as f:
         f.write(stree.as_string(schema="newick").replace("'", ""))
@@ -41,13 +66,25 @@ def score_with_MulRF(mulrf, stree, gtree, tmpname):
 
 def check_mulrf_scores(sfile, gfile, mfile, mulrf):
     """
+    Checks RF scores are the same regardless of preprocessing gene family trees
+
+    Parameters
+    ----------
+    sfile : string
+            name of file containing species tree
+    gfile : string
+            name of file containing gene family trees
+    mfile : string
+            name of file containing map between gene copy and species labels
+    mulrf: string
+           name including full path of MulRFScorer binary
     """
     # Read species tree
-    Stree = dendropy.Tree.get(path=sfile,
+    stree = dendropy.Tree.get(path=sfile,
                               schema="newick",
                               preserve_underscores=True)
 
-    for node in Stree.preorder_node_iter():
+    for node in stree.preorder_node_iter():
         node.label = None
         node.edge.length = None
 
@@ -60,30 +97,32 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
             temp = "".join(line.split())
 
             # Build MUL-tree
-            Mtree = dendropy.Tree.get(data=temp,
+            mtree = dendropy.Tree.get(data=temp,
                                       schema="newick",
                                       rooting="force-unrooted",
                                       preserve_underscores=True)
-            Mtree.is_rooted = False
-            Mtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
-            relabel_multree(Mtree, g2s_map)
+            mtree.is_rooted = False
+            mtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
+            relabel_tree_by_species(mtree, g2s_map)
 
             # Build pre-processed MUL-tree
-            MXtree = dendropy.Tree.get(data=temp,
+            mxtree = dendropy.Tree.get(data=temp,
                                        schema="newick",
                                        rooting="force-unrooted",
                                        preserve_underscores=True)
-            MXtree.is_rooted = False
-            MXtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
-            score_shift = preprocess_multree(MXtree, g2s_map)
+            mxtree.is_rooted = False
+            mxtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
+            score_shift = preprocess_multree(mxtree, g2s_map)
 
             # Compute MulRF scores
-            tmpname = gfile.rsplit('.', 1)[0]
-            MulRF_M = score_with_MulRF(mulrf, Stree, Mtree, tmpname + "-scored")
-            MulRF_MX = score_with_MulRF(mulrf, Stree, MXtree, tmpname + "-preprocessed-and-scored")
+            temp = gfile.rsplit('.', 1)[0]
+            mscore = score_with_MulRF(mulrf, stree, mtree,
+                                      temp + "-scored")
+            mxscore = score_with_MulRF(mulrf, stree, mxtree,
+                                       temp + "-preprocessed-and-scored")
 
             # Check scores match!
-            if MulRF_MX + score_shift != MulRF_M:
+            if mxscore + score_shift != mscore:
                 sys.stdout.write("Gene tree on line %d failed!" % g)
 
             g += 1
@@ -93,7 +132,7 @@ def main(args):
     check_mulrf_scores(args.stree, args.gtree, args.map, args.mulrf)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-s", "--stree", type=str,
@@ -104,11 +143,12 @@ if __name__=='__main__':
                              "(one newick string per line)",
                         required=True)
     parser.add_argument("-a", "--map", type=str,
-                        help="Input file containing label map (each row has form: "
-                        "'species_name:gene_name_1,gene_name_2,...')",
+                        help="Input file containing label map; "
+                             "each row has form: "
+                             "'species_name:gene_name_1,gene_name_2,...'",
                         required=True)
     parser.add_argument("-x", "--mulrf", type=str,
-                        help="MulRF binary (e.g., MulRFScorerMac) with full path",
+                        help="MulRFScorer binary including full path",
                         required=True)
 
     main(parser.parse_args())
