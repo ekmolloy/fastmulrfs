@@ -199,7 +199,7 @@ def compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX):
     return nLMX + c + nEM - nEMX - (2 * nR) - nLM
 
 
-def read_preprocess_and_write_multrees(ifile, ofile):
+def read_preprocess_and_write_multrees(ifile, ofile, verbose):
     """
     Creates file with preprocessed MUL-trees for FastRFS
 
@@ -214,19 +214,24 @@ def read_preprocess_and_write_multrees(ifile, ofile):
     with open(ifile, 'r') as fi, open(ofile, 'w') as fo:
         g = 1
         for line in fi.readlines():
+            if verbose:
+                sys.stdout.write("Analyzing gene tree on line %d...\n" % g)
+                sys.stdout.flush()
+
             temp = "".join(line.split())
             tree = treeswift.read_tree(temp, "newick")
 
             [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(tree)
-            
+
             score_shift = compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX)
 
             if nLMX > 3:
                 fo.write(tree.newick())
                 fo.write('\n')
             else:
-                sys.stdout.write("Removing gene tree on line %d "
-                                 "as it has three or fewer taxa!\n" % g)
+                if verbose:
+                    sys.stdout.write("Removing gene tree on line %d "
+                                     "as it has three or fewer taxa!\n" % g)
 
             g += 1
 
@@ -240,7 +245,7 @@ def main(args):
     else:
         output = args.output
 
-    read_preprocess_and_write_multrees(args.input, output)
+    read_preprocess_and_write_multrees(args.input, output, args.verbose)
 
 
 if __name__ == '__main__':
@@ -253,5 +258,6 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output", type=str,
                         help="Output file name",
                         required=False)
+    parser.add_argument('--verbose', action='store_true')
 
     main(parser.parse_args())
