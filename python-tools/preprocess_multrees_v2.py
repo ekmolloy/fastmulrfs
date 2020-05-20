@@ -134,20 +134,23 @@ def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
     found = set([])
     nLMX = 0
     c = 0
+
     for leaf in tree.traverse_leaves():
         gene = leaf.get_label()
         species = g2s_map[gene]
         all_genes = s2g_map[species]
+
         if gene == all_genes[0]:
             leaf.set_label(species)
+            nLMX += 1
         else:
             leaf.contract()
 
             if not (species in found):
                 found.add(species)
                 c += 1
-
-        nLMX += 1
+                
+    tree.suppress_unifurcations()
 
     return [nLMX, c]
 
@@ -238,6 +241,8 @@ def read_label_map(ifile):
             s2g_map[species] = genes
 
             for gene in genes:
+                if gene == species:
+                    sys.exit("Error: Gene copy label cannot be the species label!")
                 g2s_map[gene] = species
 
     return [g2s_map, s2g_map]
