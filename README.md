@@ -6,7 +6,7 @@ PYTHON DEPENDENCIES
 -------------------
 + Python 2.7 or later (including Python 3)
 + [DendroPy](https://www.dendropy.org) if using version 1
-+ [TreeSwift](https://github.com/niemasd/TreeSwift) if using version 2 or 3
++ [TreeSwift](https://github.com/niemasd/TreeSwift) if using version 2 or 3 (recommended)
 
 OTHER DEPENDENCIES (see install instructions [here](external/README.md))
 ------------------
