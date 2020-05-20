@@ -86,8 +86,9 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
                               preserve_underscores=True)
 
     for node in stree.preorder_node_iter():
-        node.label = None
         node.edge.length = None
+        if not node.is_leaf():
+            node.label = None
 
     # Read gene to species name map
     [g2s_map, s2g_map] = read_label_map(mfile)
@@ -131,7 +132,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
 
             # Check scores match!
             if mxscore + score_shift != mscore:
-                sys.stdout.write("Gene tree on line %d failed!" % g)
+                sys.stdout.write("Gene tree on line %d failed!\n" % g)
 
             total_rf += mscore
 

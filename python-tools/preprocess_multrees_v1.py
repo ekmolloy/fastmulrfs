@@ -129,6 +129,7 @@ def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
         gene = leaf.taxon.label
         species = g2s_map[gene]
         all_genes = s2g_map[species]
+
         if gene != all_genes[0]:
             leaf.taxon = None
             if not (species in found):
@@ -196,7 +197,6 @@ def compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX):
     -------
     Constant shift for RF score as described in FastMulRFS paper
     """
-    shift =
     return nLMX + c + nEM - nEMX - (2 * nR) - nLM
 
 
