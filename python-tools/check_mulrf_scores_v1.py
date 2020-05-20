@@ -1,7 +1,8 @@
 import argparse
-from copy import deepcopy
 import dendropy
-from preprocess_multrees_v1 import preprocess_multree, read_g2s_map
+from preprocess_multrees_v1 import compute_score_shift
+from preprocess_multrees_v1 import preprocess_multree
+from preprocess_multrees_v1 import read_label_map
 import os
 import sys
 
@@ -89,7 +90,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
         node.edge.length = None
 
     # Read gene to species name map
-    g2s_map = read_g2s_map(mfile)
+    [g2s_map, s2g_map] = read_label_map(mfile)
 
     total_rf = 0
 
@@ -114,7 +115,12 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
                                        preserve_underscores=True)
             mxtree.is_rooted = False
             mxtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
-            score_shift = preprocess_multree(mxtree, g2s_map)
+
+            [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(mxtree,
+                                                               g2s_map,
+                                                               s2g_map)
+
+            score_shift = compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX)
 
             # Compute MulRF scores
             temp = gfile.rsplit('.', 1)[0]

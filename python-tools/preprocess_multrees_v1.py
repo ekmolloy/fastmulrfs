@@ -29,10 +29,6 @@ def build_down_profiles(tree, g2s_map):
             gene = node.taxon.label
             species = g2s_map[gene]
             node.down = set([species])
-            try:
-                g2s_map[species] = g2s_map[species] + [gene]
-            except KeyError:
-                g2s_map[species] = [gene]
         else:
             node.down = set([])
             for child in node.child_nodes():
@@ -115,7 +111,7 @@ def contract_edges_w_invalid_bipartitions(tree):
     return [nLM, nEM, nR, nO]
 
 
-def prune_multiple_copies_of_species(tree, g2s_map):
+def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
     """
     Removes all but one leaf with the same species label
 
@@ -124,14 +120,17 @@ def prune_multiple_copies_of_species(tree, g2s_map):
     tree : dendropy tree object
     g2s_map : dictionary
               maps gene copy labels to species labels
+    s2g_map : dictionary
+              maps species label to gene copy labels
     """
     found = set([])
     c = 0
-    for l in tree.leaf_nodes():
-        gene = l.taxon.label
+    for leaf in tree.leaf_nodes():
+        gene = leaf.taxon.label
         species = g2s_map[gene]
-        if gene != g2s_map[species][0]:
-            l.taxon = None
+        all_genes = s2g_map[species]
+        if gene != all_genes[0]:
+            leaf.taxon = None
             if not (species in found):
                 found.add(species)
                 c += 1
@@ -139,15 +138,15 @@ def prune_multiple_copies_of_species(tree, g2s_map):
     tree.prune_leaves_without_taxa()
 
     nLMX = 0
-    for l in tree.leaf_nodes():
-        temp = l.taxon.label
-        l.taxon.label = g2s_map[temp]
+    for leaf in tree.leaf_nodes():
+        temp = leaf.taxon.label
+        leaf.taxon.label = g2s_map[temp]
         nLMX += 1
 
     return [nLMX, c]
 
 
-def preprocess_multree(tree, g2s_map):
+def preprocess_multree(tree, g2s_map, s2g_map):
     """
     Preprocesses MUL-tree as described in the FastMulRFS paper
 
@@ -156,6 +155,8 @@ def preprocess_multree(tree, g2s_map):
     tree : dendropy tree object
     g2s_map : dictionary
               maps gene copy labels to species labels
+    s2g_map : dictionary
+              maps species label to gene copy labels
     """
     tree.is_rooted = False
     tree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
@@ -164,15 +165,42 @@ def preprocess_multree(tree, g2s_map):
     build_up_profiles(tree)
 
     [nLM, nEM, nR, nO] = contract_edges_w_invalid_bipartitions(tree)
-    [nLMX, c] = prune_multiple_copies_of_species(tree, g2s_map)
+    [nLMX, c] = prune_multiple_copies_of_species(tree, g2s_map, s2g_map)
     nEMX = nO + nLMX
 
-    score_shift = nLMX + c + nEM - nEMX - (2 * nR) - nLM
-
-    return score_shift
+    return [nEM, nLM, nR, c, nEMX, nLMX]
 
 
-def read_g2s_map(ifile):
+def compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX):
+    """
+    Compute constant shift for RF score as described in FastMulRFS paper
+
+    Parameters
+    ----------
+    nEM : int
+          Number of edges in MUL-tree
+    nLM : int
+          Number of leaves in MUL-tree
+    nR : int
+         Number of edges in MUL-tree that induce invalid bipartitions
+         (i.e., edges split the label set into two non-disjoint sets)
+    c : int
+        Number of species with multiple copies in the MUL-tree
+    nEMX : int
+           Number of edges in preprocessed MUL-tree
+    nLMX : int
+           Number of leaves in preprocessed MUL-tree,
+           which is the same as the number of species
+
+    Returns
+    -------
+    Constant shift for RF score as described in FastMulRFS paper
+    """
+    shift =
+    return nLMX + c + nEM - nEMX - (2 * nR) - nLM
+
+
+def read_label_map(ifile):
     """
     Reads file containing map from gene copy to species labels into dictionary
 
@@ -185,18 +213,26 @@ def read_g2s_map(ifile):
 
     Returns
     -------
-    g2s_map : python dictionary
+    g2s_map : dictionary
               maps gene copy labels to species labels
+    s2g_map : dictionary
+              maps species label to gene copy labels
     """
     g2s_map = {}
+    s2g_map = {}
+
     with open(ifile, 'r') as f:
         for line in f.readlines():
             [species, genes] = line.split(':')
             genes = genes.split(',')
             genes[-1] = genes[-1].replace('\n', '')
+
+            s2g_map[species] = genes
+
             for gene in genes:
                 g2s_map[gene] = species
-    return g2s_map
+
+    return [g2s_map, s2g_map]
 
 
 def read_preprocess_and_write_multrees(ifile, mfile, ofile):
@@ -214,7 +250,7 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile):
     ofile : string
             name of output file (one newick string per line)
     """
-    g2s_map = read_g2s_map(mfile)
+    [g2s_map, s2g_map] = read_label_map(mfile)
 
     with open(ifile, 'r') as fi, open(ofile, 'w') as fo:
         g = 1
@@ -225,9 +261,13 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile):
                                      rooting="force-unrooted",
                                      preserve_underscores=True)
 
-            score_shift = preprocess_multree(tree, g2s_map)
+            [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(tree,
+                                                               g2s_map,
+                                                               s2g_map)
 
-            if len(tree.leaf_nodes()) > 3:
+            score_shift = compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX)
+
+            if nLMX > 3:
                 fo.write(tree.as_string(schema="newick")[5:])
             else:
                 sys.stdout.write("Removing gene tree on line %d "
