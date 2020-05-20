@@ -132,7 +132,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
 
             # Check scores match!
             if mxscore + score_shift != mscore:
-                sys.stdout.write("Gene tree on line %d failed!\n" % g)
+                sys.exit("Gene tree on line %d failed!\n" % g)
 
             total_rf += mscore
 

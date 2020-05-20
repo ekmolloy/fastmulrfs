@@ -48,11 +48,13 @@ def build_up_profiles(tree):
     """
     root = tree.seed_node
     children_of_root = root.child_nodes()
+
     for node in children_of_root:
         node.up = set([])
         for sibl in children_of_root:
             if node != sibl:
                 node.up = node.up.union(sibl.down)
+
     children_of_root = set(children_of_root)
 
     for node in tree.preorder_node_iter():
@@ -124,25 +126,24 @@ def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
               maps species label to gene copy labels
     """
     found = set([])
+    nLMX = 0
     c = 0
+
     for leaf in tree.leaf_nodes():
         gene = leaf.taxon.label
         species = g2s_map[gene]
         all_genes = s2g_map[species]
 
-        if gene != all_genes[0]:
+        if gene == all_genes[0]:
+            leaf.taxon.label = species
+            nLMX += 1
+        else:
             leaf.taxon = None
             if not (species in found):
                 found.add(species)
                 c += 1
 
     tree.prune_leaves_without_taxa()
-
-    nLMX = 0
-    for leaf in tree.leaf_nodes():
-        temp = leaf.taxon.label
-        leaf.taxon.label = g2s_map[temp]
-        nLMX += 1
 
     return [nLMX, c]
 
@@ -167,6 +168,7 @@ def preprocess_multree(tree, g2s_map, s2g_map):
 
     [nLM, nEM, nR, nO] = contract_edges_w_invalid_bipartitions(tree)
     [nLMX, c] = prune_multiple_copies_of_species(tree, g2s_map, s2g_map)
+
     nEMX = nO + nLMX
 
     return [nEM, nLM, nR, c, nEMX, nLMX]
@@ -230,6 +232,8 @@ def read_label_map(ifile):
             s2g_map[species] = genes
 
             for gene in genes:
+                if gene == species:
+                    sys.exit("Error: Gene copy label cannot be the species label!")
                 g2s_map[gene] = species
 
     return [g2s_map, s2g_map]
