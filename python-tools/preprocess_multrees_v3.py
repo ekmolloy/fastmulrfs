@@ -219,8 +219,6 @@ def read_preprocess_and_write_multrees(ifile, ofile):
 
             [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(tree)
             
-            sys.exit()
-
             score_shift = compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX)
 
             if nLMX > 3:
