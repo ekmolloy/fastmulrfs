@@ -68,7 +68,7 @@ OPTION(BUILD_STATIC "build static" OFF)
 **Step 3c: Open file `FastRFS/src/CMakeLists.txt` and add the following text on line 8.**
 ```
 include_directories("../../install/include"
-                     "../../install/include/phylonaut")
+                    "../../install/include/phylonaut")
 link_directories("../../install/lib")
 ```
 
