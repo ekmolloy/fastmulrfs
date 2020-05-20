@@ -49,7 +49,9 @@ def score_with_MulRF(mulrf, stree, gtree, temp):
 
     with open(ifile, 'w') as f:
         f.write(stree.newick())
+        f.write('\n')
         f.write(gtree.newick())
+        f.write('\n')
 
     os.system(mulrf + " -i " + ifile + " -o " + ofile + " &> " + lfile)
 
@@ -74,7 +76,7 @@ def strip_extra(tree):
     tree : treeswift tree object
     """
     for node in tree.traverse_preorder():
-        node.length = None
+        node.edge_length = None
         if not node.is_leaf():
             node.label = None
 
