@@ -94,24 +94,24 @@ def contract_edges_w_invalid_bipartitions(tree):
 
     for node in tree.traverse_postorder():
         if node.is_root():
-            node.length = None
+            node.edge_length = None
         elif node.is_leaf():
-            node.length = None
+            node.edge_length = None
             nLM += 1
         else:
             test = node.down.intersection(node.up)
             if len(test) != 0:
                 nX += 1
-                node.length = 0.0
+                node.edge_length = 0.0
             else:
                 if (len(node.down) == 1) or (len(node.up) == 1):
                     nR += 1
                 else:
                     nO += 1
-                node.length = None
+                node.edge_length = None
 
     for node in tree.traverse_postorder():
-        if node.length is not None:
+        if node.edge_length is not None:
             node.contract()
 
     nEM = nLM + nX + nR + nO
@@ -279,6 +279,7 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile):
 
             if nLMX > 3:
                 fo.write(tree.newick())
+                fo.write('\n')
             else:
                 sys.stdout.write("Removing gene tree on line %d "
                                  "as it has three or fewer taxa!\n" % g)
