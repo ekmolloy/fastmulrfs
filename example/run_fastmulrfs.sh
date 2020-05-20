@@ -4,7 +4,8 @@ tools="../python-tools"
 fastmulrfs="../external/FastRFS/build/FastRFS"
 
 python $tools/preprocess_multrees_v3.py \
-    -i g_trees-mult.trees
+    -i g_trees-mult.trees \
+    --verbose
 
 if [ ! -e $fastmulrfs ]; then
     echo "Need to get external dependencies!"
