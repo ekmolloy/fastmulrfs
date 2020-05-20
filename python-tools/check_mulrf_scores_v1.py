@@ -65,16 +65,15 @@ def score_with_MulRF(mulrf, stree, gtree, temp):
     return score
 
 
-def strip_extra(tree):
+def remove_internal_node_labels(tree):
     """
-    Remove edge lengths and internal node label from tree
+    Remove internal node label from tree before running MulRF
 
     Parameters
     ----------
     tree : dendropy tree object
     """
     for node in tree.preorder_node_iter():
-        node.edge.length = None
         if not node.is_leaf():
             node.label = None
 
@@ -98,8 +97,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
     stree = dendropy.Tree.get(path=sfile,
                               schema="newick",
                               preserve_underscores=True)
-
-    strip_extra(stree)
+    remove_internal_node_labels(stree)
 
     # Read gene to species name map
     [g2s_map, s2g_map] = read_label_map(mfile)
@@ -116,9 +114,9 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
                                       schema="newick",
                                       rooting="force-unrooted",
                                       preserve_underscores=True)
+            remove_internal_node_labels(mtree)
             mtree.is_rooted = False
             mtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
-            strip_extra(mtree)
 
             relabel_tree_by_species(mtree, g2s_map)
 
@@ -127,9 +125,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
                                        schema="newick",
                                        rooting="force-unrooted",
                                        preserve_underscores=True)
-            mxtree.is_rooted = False
-            mxtree.collapse_basal_bifurcation(set_as_unrooted_tree=True)
-            strip_extra(mxtree)
+            remove_internal_node_labels(mxtree)
 
             [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(mxtree,
                                                                g2s_map,
