@@ -258,6 +258,6 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output", type=str,
                         help="Output file name",
                         required=False)
-    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument("--verbose", action="store_true")
 
     main(parser.parse_args())

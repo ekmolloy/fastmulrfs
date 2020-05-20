@@ -242,13 +242,14 @@ def read_label_map(ifile):
 
             for gene in genes:
                 if gene == species:
-                    sys.exit("Error: Gene copy label cannot be the species label!")
+                    sys.exit("Error: Gene copy label cannot be the species "
+                             "label!")
                 g2s_map[gene] = species
 
     return [g2s_map, s2g_map]
 
 
-def read_preprocess_and_write_multrees(ifile, mfile, ofile):
+def read_preprocess_and_write_multrees(ifile, mfile, ofile, verbose):
     """
     Creates file with preprocessed MUL-trees for FastRFS
 
@@ -268,6 +269,11 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile):
     with open(ifile, 'r') as fi, open(ofile, 'w') as fo:
         g = 1
         for line in fi.readlines():
+            if verbose:
+                if verbose:
+                    sys.stdout.write("Analyzing gene tree on line %d...\n" % g)
+                    sys.stdout.flush()
+
             temp = "".join(line.split())
             tree = treeswift.read_tree(temp, "newick")
 
@@ -281,8 +287,9 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile):
                 fo.write(tree.newick())
                 fo.write('\n')
             else:
-                sys.stdout.write("Removing gene tree on line %d "
-                                 "as it has three or fewer taxa!\n" % g)
+                if verbose:
+                    sys.stdout.write("Removing gene tree on line %d "
+                                     "as it has three or fewer taxa!\n" % g)
 
             g += 1
 
@@ -296,7 +303,10 @@ def main(args):
     else:
         output = args.output
 
-    read_preprocess_and_write_multrees(args.input, args.map, output)
+    read_preprocess_and_write_multrees(args.input,
+                                       args.map,
+                                       output,
+                                       args.verbose)
 
 
 if __name__ == '__main__':
@@ -314,5 +324,6 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output", type=str,
                         help="Output file name",
                         required=False)
+    parser.add_argument("--verbose", action="store_true")
 
     main(parser.parse_args())

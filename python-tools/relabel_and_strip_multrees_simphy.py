@@ -16,7 +16,7 @@ def relabel_multrees_simphy(ifil, ofil):
            name of output file (one newick string per line)
     """
     with open(ifil, 'r') as fi, open(ofil, 'w') as fo:
-       for line in fi.readlines():
+        for line in fi.readlines():
             temp = "".join(line.split())
             tree = treeswift.read_tree(temp, "newick")
 
@@ -39,7 +39,7 @@ def main(args):
     relabel_multrees_simphy(args.input, output)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input", type=str,

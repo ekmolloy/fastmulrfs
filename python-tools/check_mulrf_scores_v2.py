@@ -118,7 +118,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
             relabel_tree_by_species(mtree, g2s_map)
 
             # Build pre-processed MUL-tree
-            mxtree =  treeswift.read_tree(temp, "newick")
+            mxtree = treeswift.read_tree(temp, "newick")
             mxtree.deroot()
             strip_extra(mxtree)
 

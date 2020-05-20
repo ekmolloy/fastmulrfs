@@ -95,7 +95,7 @@ def check_mulrf_scores(sfile, gfile, mulrf):
             strip_extra(mtree)
 
             # Build pre-processed MUL-tree
-            mxtree =  treeswift.read_tree(temp, "newick")
+            mxtree = treeswift.read_tree(temp, "newick")
             mxtree.deroot()
             strip_extra(mxtree)
 
