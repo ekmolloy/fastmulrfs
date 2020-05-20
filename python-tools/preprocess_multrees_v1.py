@@ -125,7 +125,7 @@ def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
     s2g_map : dictionary
               maps species label to gene copy labels
     """
-    found = set([])
+    found_duplicate = set([])
     nLMX = 0
     c = 0
 
@@ -139,8 +139,8 @@ def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
             nLMX += 1
         else:
             leaf.taxon = None
-            if not (species in found):
-                found.add(species)
+            if not (species in found_duplicate):
+                found_duplicate.add(species)
                 c += 1
 
     tree.prune_leaves_without_taxa()
