@@ -17,10 +17,10 @@ CITATION
 --------
 ```
 @article{molloy2020fastmulrfs,
-	author = {Molloy, Erin K. and Warnow, Tandy},
-	title = {FastMulRFS: Fast and accurate species tree estimation under generic gene duplication and loss models},
-	year = {2020},
-	journal = {bioRxiv},
+  author = {Molloy, Erin K. and Warnow, Tandy},
+  title = {FastMulRFS: Fast and accurate species tree estimation under generic gene duplication and loss models},
+  year = {2020},
+  journal = {bioRxiv},
   elocation-id = {835553},
   publisher = {Cold Spring Harbor Laboratory},
   doi = {10.1101/835553}
