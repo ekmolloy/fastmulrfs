@@ -4,6 +4,7 @@ from preprocess_multrees_v1 import compute_score_shift
 from preprocess_multrees_v1 import preprocess_multree
 from preprocess_multrees_v1 import read_label_map
 import os
+import os.path
 import sys
 
 
@@ -154,6 +155,8 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
 
 
 def main(args):
+    if not os.path.exists(args.mulrf):
+        sys.exit(args.mulrf + " does not exist!\n")
     check_mulrf_scores(args.stree, args.gtree, args.map, args.mulrf)
 
 

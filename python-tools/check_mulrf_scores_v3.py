@@ -3,6 +3,7 @@ from preprocess_multrees_v3 import compute_score_shift
 from preprocess_multrees_v3 import preprocess_multree
 from preprocess_multrees_v3 import unroot
 import os
+import os.path
 import sys
 import treeswift
 
@@ -125,6 +126,9 @@ def check_mulrf_scores(sfile, gfile, mulrf):
 
 
 def main(args):
+    if not os.path.exists(args.mulrf):
+        sys.exit(args.mulrf + " does not exist!\n")
+
     check_mulrf_scores(args.stree, args.gtree, args.mulrf)
 
 
