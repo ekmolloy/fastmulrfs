@@ -13,7 +13,7 @@ def relabel_tree_by_species(tree, g2s_map):
 
     Parameters
     ----------
-    tree : dendropy tree object
+    tree : treeswift tree object
     g2s_map : dictionary
               maps gene copy labels to species labels
     """
@@ -31,9 +31,9 @@ def score_with_MulRF(mulrf, stree, gtree, temp):
     ----------
     mulrf : string
             name including full path of MulRFScorer binary
-    stree : dendropy tree object
+    stree : treeswift tree object
             species tree
-    gtree : dendropy tree object
+    gtree : treeswift tree object
             gene family tree
     temp : string
            name for creating temporary files
@@ -65,6 +65,20 @@ def score_with_MulRF(mulrf, stree, gtree, temp):
     return score
 
 
+def strip_extra(tree):
+    """
+    Remove edge lengths and internal node label from tree
+
+    Parameters
+    ----------
+    tree : treeswift tree object
+    """
+    for node in tree.traverse_preorder():
+        node.length = None
+        if not node.is_leaf():
+            node.label = None
+
+
 def check_mulrf_scores(sfile, gfile, mfile, mulrf):
     """
     Checks RF scores are the same regardless of preprocessing gene family trees
@@ -82,11 +96,7 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
     """
     # Read species tree
     stree = treeswift.read_tree(sfile, "newick")
-
-    for node in stree.traverse_preorder():
-        node.length = None
-        if not node.is_leaf():
-            node.label = None
+    strip_extra(stree)
 
     # Read gene to species name map
     [g2s_map, s2g_map] = read_label_map(mfile)
@@ -101,11 +111,14 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
             # Build MUL-tree
             mtree = treeswift.read_tree(temp, "newick")
             mtree.deroot()
+            strip_extra(mtree)
+
             relabel_tree_by_species(mtree, g2s_map)
 
             # Build pre-processed MUL-tree
             mxtree =  treeswift.read_tree(temp, "newick")
             mxtree.deroot()
+            strip_extra(mxtree)
 
             [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(mxtree,
                                                                g2s_map,
