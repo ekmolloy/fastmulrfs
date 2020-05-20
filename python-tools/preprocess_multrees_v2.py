@@ -22,7 +22,7 @@ def build_down_profiles(tree, g2s_map):
 
     Parameters
     ----------
-    tree : dendropy tree object
+    tree : treeswift tree object
     """
     for node in tree.traverse_postorder():
         if node.is_leaf():
@@ -44,7 +44,7 @@ def build_up_profiles(tree):
 
     Parameters
     ----------
-    tree : dendropy tree object
+    tree : treeswift tree object
     """
     # Find root node
     for node in tree.traverse_preorder():
@@ -85,7 +85,7 @@ def contract_edges_w_invalid_bipartitions(tree):
 
     Parameters
     ----------
-    tree : dendropy tree object
+    tree : treeswift tree object
     """
     nLM = 0
     nX = 0
@@ -125,7 +125,7 @@ def prune_multiple_copies_of_species(tree, g2s_map, s2g_map):
 
     Parameters
     ----------
-    tree : dendropy tree object
+    tree : treeswift tree object
     g2s_map : dictionary
               maps gene copy labels to species labels
     s2g_map : dictionary
@@ -161,7 +161,7 @@ def preprocess_multree(tree, g2s_map, s2g_map):
 
     Parameters
     ----------
-    tree : dendropy tree object
+    tree : treeswift tree object
     g2s_map : dictionary
               maps gene copy labels to species labels
     s2g_map : dictionary
