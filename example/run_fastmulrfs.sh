@@ -1,9 +1,9 @@
 #!/bin/bash
 
-tools="../python-tools"
+preprocess="../python-tools/preprocess_multrees_v3.py"
 fastmulrfs="../external/FastRFS/build/FastRFS"
 
-python $tools/preprocess_multrees_v3.py \
+python $preprocess \
     -i g_trees-mult.trees \
     --verbose
 
