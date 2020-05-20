@@ -3,17 +3,13 @@
 tools="../python-tools"
 fastmulrfs="../external/FastRFS/build/FastRFS"
 
-python $tools/map_species_to_gene_simphy.py \
-    -i g_trees.trees
-
-python $tools/preprocess_multrees_v1.py \
-    -i g_trees-s2g.trees \
-    -a g_trees-s2g-map.txt
+python $tools/preprocess_multrees_v3.py \
+    -i g_trees-mult.trees
 
 if [ ! -e $fastmulrfs ]; then
     echo "Need to get external dependencies!"
 else
     $fastmulrfs \
-        -i g_trees-s2g-for-fastrfs.trees \
+        -i g_trees-mult-for-fastrfs.trees \
         -o fastmulrfs.tree &> fastmulrfs.log
 fi
