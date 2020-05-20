@@ -1,6 +1,7 @@
 import argparse
 from preprocess_multrees_v3 import compute_score_shift
 from preprocess_multrees_v3 import preprocess_multree
+from preprocess_multrees_v3 import unroot
 import os
 import sys
 import treeswift
@@ -51,9 +52,9 @@ def score_with_MulRF(mulrf, stree, gtree, temp):
     return score
 
 
-def strip_extra(tree):
+def remove_internal_node_labels(tree):
     """
-    Remove edge lengths and internal node label from tree
+    Remove internal node label from tree before running MulRF
 
     Parameters
     ----------
@@ -80,7 +81,8 @@ def check_mulrf_scores(sfile, gfile, mulrf):
     """
     # Read species tree
     stree = treeswift.read_tree(sfile, "newick")
-    strip_extra(stree)
+    remove_internal_node_labels(stree)
+    stree.suppress_unifurcations()
 
     total_rf = 0
 
@@ -91,13 +93,12 @@ def check_mulrf_scores(sfile, gfile, mulrf):
 
             # Build MUL-tree
             mtree = treeswift.read_tree(temp, "newick")
-            mtree.deroot()
-            strip_extra(mtree)
+            remove_internal_node_labels(mtree)
+            unroot(mtree)
 
             # Build pre-processed MUL-tree
             mxtree = treeswift.read_tree(temp, "newick")
-            mxtree.deroot()
-            strip_extra(mxtree)
+            remove_internal_node_labels(mxtree)
 
             [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(mxtree)
 

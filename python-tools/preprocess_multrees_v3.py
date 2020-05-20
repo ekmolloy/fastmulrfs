@@ -15,6 +15,32 @@ import sys
 import treeswift
 
 
+def unroot(tree):
+    """
+    Unroot tree
+
+    Parameters
+    ----------
+    tree : treeswift tree object
+    """
+    tree.suppress_unifurcations()
+
+    for node in tree.traverse_preorder():
+        if node.is_root():
+            root = node
+
+    children_of_root = root.child_nodes()
+
+    if len(children_of_root) == 2:
+        [left, right] = children_of_root
+
+        children_of_left = left.child_nodes()
+
+        root.remove_child(left)
+        for child in children_of_left:
+            root.add_child(child)
+
+
 def build_down_profiles(tree):
     """
     Annotates edge above each node with an 'down profile', i.e., the set of
@@ -155,8 +181,7 @@ def preprocess_multree(tree):
     ----------
     tree : treeswift tree object
     """
-    tree.suppress_unifurcations()
-    tree.deroot()
+    unroot(tree)
 
     build_down_profiles(tree)
 
