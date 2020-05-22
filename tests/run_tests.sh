@@ -6,9 +6,9 @@ checkv2="../python-tools/check_mulrf_scores_v2.py"
 checkv3="../python-tools/check_mulrf_scores_v3.py"
 
 
-true_rfs=( 1052 12548)
+true_rfs=( 1052 12548 955 )
 
-for i in 1 2; do
+for i in 1 2 3; do
     j=$[i-1]
     true_rf=${true_rfs[$j]}
 
@@ -47,3 +47,33 @@ for i in 1 2; do
         echo "    $data"
     fi
 done
+
+exit
+
+# Check that all versions are getting the same trees!
+preprocessv1="../python-tools/preprocess_multrees_v1.py"
+preprocessv2="../python-tools/preprocess_multrees_v2.py"
+preprocessv3="../python-tools/preprocess_multrees_v3.py"
+
+for i in 1 2 3; do
+    python $preprocessv1 -i g_trees_${i}-s2g.trees \
+                         -a g_trees_${i}-s2g-map.txt
+
+    python $preprocessv2 -i g_trees_${i}-s2g.trees \
+                         -a g_trees_${i}-s2g-map.txt
+
+    python $preprocessv3 -i g_trees_${i}-mult.trees
+
+    python ../python-tools/compare_tree_lists.py \
+        -l1 g_trees_${i}-s2g-preprocessed-v1-for-fastrfs.trees \
+        -l2 g_trees_${i}-mult-preprocessed-v3-for-fastrfs.trees \
+        -p "test-$i,v1-vs-v3" -o compare_trees.csv
+
+    python ../python-tools/compare_tree_lists.py \
+        -l1 g_trees_${i}-s2g-preprocessed-v1-for-fastrfs.trees \
+        -l2 g_trees_${i}-s2g-preprocessed-v2-for-fastrfs.trees \
+        -p "test-$i,v1-vs-v2" -o compare_trees.csv
+done
+
+# This should always be 0!
+sed 's/,/ /g' compare_trees.csv | awk '{print $9}'
