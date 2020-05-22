@@ -261,43 +261,51 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile, verbose):
         g = 1
         for line in fi.readlines():
             if verbose:
-                sys.stdout.write("Analyzing gene tree on line %d...\n" % g)
-                sys.stdout.flush()
+                sys.stdout.write("Preprocessing gene tree on line %d...\n" % g)
+                sys.flush()
 
             temp = "".join(line.split())
-            tree = dendropy.Tree.get(data=temp,
-                                     schema="newick",
-                                     rooting="force-unrooted",
-                                     preserve_underscores=True)
 
-            [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(tree,
-                                                               g2s_map,
-                                                               s2g_map)
-
-            score_shift = compute_score_shift(nEM, nLM, nR, c, nEMX, nLMX)
-
-            if nLMX > 3:
-                fo.write(tree.as_string(schema="newick")[5:])
+            if not temp:
+                donot = 1
             else:
-                if verbose:
-                    sys.stdout.write("Removing gene tree on line %d "
-                                     "as it has three or fewer taxa!\n" % g)
+                tree = treeswift.read_tree_newick(temp)
+
+                toofew = False
+                if count_leaves(tree) < 4:
+                    dotnot = 2
+                else:
+                    [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(tree,
+                                                                       g2s_map,
+                                                                       s2g_map)
+                    score_shift = compute_score_shift(nEM, nLM, nR, c, nEMX,
+                                                      nLMX)
+
+                    if nLMX < 4:
+                        donot = 3
+                    else:
+                        fo.write(tree.newick() + '\n')
+
+                if donot and verbose:
+                    sys.stdout.write("...did not write tree as ")
+                    if donot == 1:
+                        sys.stdout.write("as line is empty!")
+                    elif donot == 2:
+                        sys.stdout.write("as tree has <4 leaves before "
+                                         "preprocessing!")
+                    elif donot == 3:
+                        sys.stdout.write("as tree has <4 leaves after "
+                                         "preprocessing!")
+                    sys.stdout.write('\n')
+                    sys.stdout.flush()
 
             g += 1
 
 
 def main(args):
-    if args.output is None:
-        base = args.input.rsplit('.', 1)
-        prefix = base[0]
-        suffix = base[1]
-        output = base[0] + "-for-fastrfs." + base[1]
-    else:
-        output = args.output
-
     read_preprocess_and_write_multrees(args.input,
                                        args.map,
-                                       output,
+                                       args.output,
                                        args.verbose)
 
 
@@ -315,7 +323,7 @@ if __name__ == '__main__':
                         required=True)
     parser.add_argument("-o", "--output", type=str,
                         help="Output file name",
-                        required=False)
+                        required=True)
     parser.add_argument("--verbose", action="store_true")
 
     main(parser.parse_args())

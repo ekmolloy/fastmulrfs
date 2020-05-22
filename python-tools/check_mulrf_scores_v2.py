@@ -113,14 +113,14 @@ def check_mulrf_scores(sfile, gfile, mfile, mulrf):
             temp = "".join(line.split())
 
             # Build MUL-tree
-            mtree = treeswift.read_tree(temp, "newick")
+            mtree = treeswift.read_tree_newick(temp)
             remove_internal_node_labels(mtree)
             unroot(mtree)
 
             relabel_tree_by_species(mtree, g2s_map)
 
             # Build pre-processed MUL-tree
-            mxtree = treeswift.read_tree(temp, "newick")
+            mxtree = treeswift.read_tree_newick(temp)
             remove_internal_node_labels(mxtree)
 
             [nEM, nLM, nR, c, nEMX, nLMX] = preprocess_multree(mxtree,

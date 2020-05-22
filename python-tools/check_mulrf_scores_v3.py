@@ -93,7 +93,7 @@ def check_mulrf_scores(sfile, gfile, mulrf):
             temp = "".join(line.split())
 
             # Build MUL-tree
-            mtree = treeswift.read_tree(temp, "newick")
+            mtree = treeswift.read_tree_newick(temp)
             remove_internal_node_labels(mtree)
             unroot(mtree)
 
