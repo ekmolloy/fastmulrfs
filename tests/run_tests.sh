@@ -48,7 +48,6 @@ for i in 1 2 3; do
     fi
 done
 
-exit
 
 # Check that all versions are getting the same trees!
 preprocessv1="../python-tools/preprocess_multrees_v1.py"
@@ -57,12 +56,15 @@ preprocessv3="../python-tools/preprocess_multrees_v3.py"
 
 for i in 1 2 3; do
     python $preprocessv1 -i g_trees_${i}-s2g.trees \
-                         -a g_trees_${i}-s2g-map.txt
+                         -a g_trees_${i}-s2g-map.txt \
+                         -o g_trees_${i}-s2g-preprocessed-v1-for-fastrfs.trees
 
     python $preprocessv2 -i g_trees_${i}-s2g.trees \
-                         -a g_trees_${i}-s2g-map.txt
+                         -a g_trees_${i}-s2g-map.txt \
+                         -o g_trees_${i}-s2g-preprocessed-v2-for-fastrfs.trees
 
-    python $preprocessv3 -i g_trees_${i}-mult.trees
+    python $preprocessv3 -i g_trees_${i}-mult.trees \
+                         -o g_trees_${i}-mult-preprocessed-v3-for-fastrfs.trees
 
     python ../python-tools/compare_tree_lists.py \
         -l1 g_trees_${i}-s2g-preprocessed-v1-for-fastrfs.trees \

@@ -304,6 +304,7 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile, verbose):
 
     with open(ifile, 'r') as fi, open(ofile, 'w') as fo:
         g = 1
+
         for line in fi.readlines():
             if verbose:
                 sys.stdout.write("Preprocessing gene tree on line %d...\n" % g)
@@ -311,12 +312,12 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile, verbose):
 
             temp = "".join(line.split())
 
+            donot = 0
             if not temp:
                 donot = 1
             else:
                 tree = treeswift.read_tree_newick(temp)
 
-                toofew = False
                 if count_leaves(tree) < 4:
                     dotnot = 2
                 else:

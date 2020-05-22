@@ -15,6 +15,19 @@ import dendropy
 import sys
 
 
+def count_leaves(tree):
+    """
+    Count number of leaves in tree
+
+    Parameters
+    ----------
+    tree : treeswift tree object
+
+    Returns number of leaves in tree
+    """
+    return len([l for l in tree.leaf_nodes()])
+
+
 def build_down_profiles(tree, g2s_map):
     """
     Annotates edge above each node with an 'down profile', i.e., the set of
@@ -266,12 +279,15 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile, verbose):
 
             temp = "".join(line.split())
 
+            donot = 0
             if not temp:
                 donot = 1
             else:
-                tree = treeswift.read_tree_newick(temp)
+                tree = dendropy.Tree.get(data=temp,
+                                      schema="newick",
+                                      rooting="force-unrooted",
+                                      preserve_underscores=True)
 
-                toofew = False
                 if count_leaves(tree) < 4:
                     dotnot = 2
                 else:
@@ -284,7 +300,7 @@ def read_preprocess_and_write_multrees(ifile, mfile, ofile, verbose):
                     if nLMX < 4:
                         donot = 3
                     else:
-                        fo.write(tree.newick() + '\n')
+                        fo.write(tree.as_string(schema="newick")[5:])
 
                 if donot and verbose:
                     sys.stdout.write("...did not write tree as ")
