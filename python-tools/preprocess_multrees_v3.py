@@ -253,7 +253,7 @@ def read_preprocess_and_write_multrees(ifile, ofile, verbose):
         for line in fi.readlines():
             if verbose:
                 sys.stdout.write("Preprocessing gene tree on line %d...\n" % g)
-                sys.flush()
+                sys.stdout.flush()
 
             temp = "".join(line.split())
 

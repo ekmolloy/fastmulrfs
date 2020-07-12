@@ -5,6 +5,7 @@ fastmulrfs="../external/FastRFS/build/FastRFS"
 
 python $preprocess \
     -i g_trees-mult.trees \
+    -o g_trees-mult-for-fastrfs.trees \
     --verbose
 
 if [ ! -e $fastmulrfs ]; then
