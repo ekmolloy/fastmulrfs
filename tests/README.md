@@ -19,4 +19,4 @@ cd ../tests
 ./run_tests.sh
 ```
 
-NOTE: These tests pass when the last equation in Lemma 13 [here](https://doi.org/10.1101/835553) holds.
+NOTE: These tests pass when the last equation in [Lemma 13](https://doi.org/10.1093/bioinformatics/btaa444) holds.
