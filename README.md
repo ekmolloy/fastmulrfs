@@ -1,6 +1,6 @@
 FastMulRFS
 ==========
-[FastMulRFS](https://doi.org/10.1101/835553) is a pipeline for estimating species trees from multi-copy gene trees, based on the Robinson-Foulds supertree problem for MUL-trees ([MulRF](https://doi.org/10.1186/1748-7188-8-28)). See this [example](example/README.md).
+[FastMulRFS](https://doi.org/10.1093/bioinformatics/btaa444) is a pipeline for estimating species trees from multi-copy gene trees, based on the Robinson-Foulds supertree problem for MUL-trees ([MulRF](https://doi.org/10.1186/1748-7188-8-28)). See this [example](example/README.md).
 
 PYTHON DEPENDENCIES
 -------------------
@@ -18,12 +18,13 @@ CITATION
 ```
 @article{molloy2020fastmulrfs,
   author = {Molloy, Erin K. and Warnow, Tandy},
-  title = {FastMulRFS: Fast and accurate species tree estimation under generic gene duplication and loss models},
+  title = {{FastMulRFS: Fast and accurate species tree estimation under generic gene duplication and loss models}},
   year = {2020},
-  journal = {bioRxiv},
-  elocation-id = {835553},
-  publisher = {Cold Spring Harbor Laboratory},
-  doi = {10.1101/835553}
+  journal = {Bioinformatics},
+  volume = {36},
+  number = {Supplement_1},
+  pages = {i57--i65},
+  doi = {10.1093/bioinformatics/btaa444}
 }
 ```
 
