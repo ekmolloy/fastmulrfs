@@ -60,18 +60,6 @@ Step 3: Get FastRFS
 git clone https://github.com/ekmolloy/FastRFS.git
 ```
 
-**Step 3b: Open file `FastRFS/src/CMakeLists.txt` and change `ON` to `OFF` in line 3, so the line reads:**
-```
-OPTION(BUILD_STATIC "build static" OFF)
-```
-
-**Step 3c: Open file `FastRFS/src/CMakeLists.txt` and add the following text on line 8.**
-```
-include_directories("../../install/include"
-                    "../../install/include/phylonaut")
-link_directories("../../install/lib")
-```
-
 **Step 3d: Build FastRFS.**
 ```
 cd FastRFS/
