@@ -43,7 +43,7 @@ cmake ../src
 make
 ```
 
-Step 3: Get ASTRAL-III
+Step 4: Get ASTRAL-III
 ----------------------
 ```
 git clone https://github.com/smirarab/ASTRAL.git
