@@ -22,13 +22,8 @@ cd ../../
 
 Step 2: Get PhyloNaut
 ---------------------
-**Step 2a: Download phylonaut.**
 ```
 git clone https://github.com/ekmolloy/phylonaut.git
-```
-
-**Step 2b: Build phylonaut.**
-```
 cd phylonaut
 mkdir build
 cd build/
@@ -39,13 +34,8 @@ cd ../../
 
 Step 3: Get FastRFS
 ---------------------
-**Step 3a: Download FastRFS.**
 ```
 git clone https://github.com/ekmolloy/FastRFS.git
-```
-
-**Step 3b: Build FastRFS.**
-```
 cd FastRFS/
 mkdir build
 cd build/
