@@ -60,7 +60,7 @@ Step 3: Get FastRFS
 git clone https://github.com/ekmolloy/FastRFS.git
 ```
 
-**Step 3d: Build FastRFS.**
+**Step 3b: Build FastRFS.**
 ```
 cd FastRFS/
 mkdir build
