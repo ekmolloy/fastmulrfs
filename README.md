@@ -29,10 +29,22 @@ Citation for FastMulRFS:
 }
 ```
 
-Citations for external dependencies:
+Citations for dependencies:
+```
+@article{moshiri2020treeswift,
+  author = {N. Moshiri},
+  title = {{TreeSwift: a massively scalable Python package for trees}},
+  year = {2020},
+  journal = {SoftwareX},
+  volume = {11},
+  pages = {100436},
+  doi = {10.1016/j.softx.2020.100436}
+}
+```
+
 ```
 @article{vachaspati2017fastrfs,
-  author = {Pranjal Vachaspati and Tandy Warnow},
+  author = {P. Vachaspati and T. Warnow},
   title = {{FastRFS: fast and accurate Robinson-Foulds Supertrees using constrained exact optimization}},
   year = {2017},
   journal = {Bioinformatics},
@@ -42,9 +54,10 @@ Citations for external dependencies:
   doi = {10.1093/bioinformatics/btw600}
 }
 ```
+
 ```
 @article{zhang2018astral3,
-  author = {Chao Zhang and Maryam Rabiee and Erfan Sayyari and Siavash Mirarab},
+  author = {C. Zhang and M. Rabiee and E. Sayyari and S. Mirarab},
   title = {{ASTRAL-III: polynomial time species tree reconstruction from partially resolved gene trees}},
   year = {2018},
   journal = {BMC Bioinformatics},
