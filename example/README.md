@@ -1,5 +1,6 @@
 FastMulRFS Example
 ==================
+**Step 0:** Clone this repository.
 ```
 git clone https://github.com/ekmolloy/fastmulrfs.git
 cd example
