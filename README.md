@@ -5,8 +5,8 @@ FastMulRFS
 PYTHON DEPENDENCIES
 -------------------
 + Python 3
-+ [DendroPy](https://www.dendropy.org) if using version 1
-+ [TreeSwift](https://github.com/niemasd/TreeSwift) if using version 2 or 3 (recommended)
++ [DendroPy](https://www.dendropy.org) if using [version 1](https://github.com/ekmolloy/fastmulrfs/blob/master/python-tools/preprocess_multrees_v1.py)
++ [TreeSwift](https://github.com/niemasd/TreeSwift) if using [version 2](https://github.com/ekmolloy/fastmulrfs/blob/master/python-tools/preprocess_multrees_v2.py) or [version 3](https://github.com/ekmolloy/fastmulrfs/blob/master/python-tools/preprocess_multrees_v3.py) (recommended)
 
 OTHER DEPENDENCIES (see install instructions [here](external/README.md))
 ------------------
