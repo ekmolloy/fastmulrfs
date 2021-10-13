@@ -13,6 +13,7 @@ Step 1: Get PhyloKit
 ```
 git clone https://github.com/pranjalv123/phylokit.git
 cd phylokit/
+git checkout 90763d0ebc32e0a4eceea5d190e796e7110e610d
 mkdir build
 cd build/
 cmake -DCMAKE_INSTALL_PREFIX=../../install ../src
